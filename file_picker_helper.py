@@ -14,7 +14,7 @@ class FilePickerHelper:
         self.row_table = ft.Row(alignment=ft.MainAxisAlignment.CENTER)
 
         # Row for columns count, next table columns and previous columns
-        self.row_table_editing = ft.Row(alignment=ft.MainAxisAlignment.CENTER, spacing=20)
+        self.row_table_editing = ft.Row(alignment=ft.MainAxisAlignment.CENTER, scale=1.3, height=60)
 
         # row for columns names
         self.row_columns_names = ft.Row(alignment=ft.MainAxisAlignment.CENTER)
@@ -22,11 +22,13 @@ class FilePickerHelper:
         # Count data frame columns
         self.columns_count = ft.Text("Columns: 0")
         self.rows_count = ft.Text("Rows: 0")
-        # Get columns name button
-        self.get_column_button = ft.TextButton("Columns' name", disabled=True, visible=True, on_click=self.get_columns_name)
+        # For scrolling dataframe's columns
+        self.next_column = ft.IconButton(icon=ft.icons.ARROW_FORWARD, disabled=True,
+                                         on_click=self.increase_dataframe_column)
+        self.previous_column = ft.IconButton(icon=ft.icons.ARROW_BACK, disabled=True)
+
         # Get all columns' names
-        self.columns_names = ft.Text("", no_wrap=False)
-        self.column_name_show = False
+        self.columns_names = ft.Text("", no_wrap=False, scale=1.5, width=self.page.width / 2)
 
         # File name
         self.file_name = None
@@ -36,6 +38,8 @@ class FilePickerHelper:
         ])], border_radius=10, expand=True, border=ft.border.all(2, "grey"))
         # How many columns to show in data frame
         self.show_columns = 8
+        # if we have many more than 8 columns, for next and prev buttons
+        self.show_count = 0
 
         # File path
         self.file_path = ft.Text("Selected path", expand=1)
@@ -50,10 +54,10 @@ class FilePickerHelper:
         # Editing column's
         self.row_table_editing.controls.append(self.rows_count)
         self.row_table_editing.controls.append(self.columns_count)
-        self.row_table_editing.controls.append(self.get_column_button)
+        self.row_table_editing.controls.append(self.next_column)
+        self.row_table_editing.controls.append(self.previous_column)
 
         self.row_columns_names.controls.append(self.columns_names)
-
 
     def select_file(self, e: ft.FilePickerResultEvent):
         try:
@@ -76,24 +80,20 @@ class FilePickerHelper:
 
     def show_data_frame_columns(self, df: pd.DataFrame) -> list:
         """Return data frame columns"""
-        return [ft.DataColumn(ft.Text(header)) for header in df.columns[:self.show_columns]]
+        return [ft.DataColumn(ft.Text(header)) for header in df.columns[self.show_count:self.show_columns]]
 
     def show_data_frame_rows(self, df: pd.DataFrame) -> list:
         """Returns data frame rows"""
         rows = []
         for _, row in df.iterrows():
-            cells = [ft.DataCell(ft.Text(str(row[header]))) for header in df.columns[:self.show_columns]]
+            cells = [ft.DataCell(ft.Text(str(row[header]))) for header in df.columns[self.show_count:self.show_columns]]
             rows.append(ft.DataRow(cells=cells))
         return rows
 
-    def get_row_editing_button(self):
-        """Disable and make visible the get columns' name"""
-        self.get_column_button.disabled = False
-        self.get_column_button.visible = True
-        self.get_column_button.update()
-
-    def get_columns_name(self):
-        self.column_name_show = True
+    def increase_dataframe_column(self, e: ft.FilePickerResultEvent):
+        self.show_columns += self.show_columns
+        self.show_count += self.show_columns
+        self.table_data_frame.update()
 
     def represent_csv_file(self):
         """Represent csv file on the screen"""
@@ -101,7 +101,6 @@ class FilePickerHelper:
             try:
                 data_frame = pd.read_csv(self.file_name)
                 print(data_frame.head())
-                print(data_frame.columns[0])
                 data_frame_head = data_frame.head()
                 # Change DataTable into new columns with data
                 self.table_data_frame.columns = self.show_data_frame_columns(data_frame_head)
@@ -112,11 +111,14 @@ class FilePickerHelper:
                 self.columns_count.update()
                 self.rows_count.value = f"Rows: {len(data_frame_head)}"
                 self.rows_count.update()
-                # Show columns get name button
-                self.get_row_editing_button()
-                if self.column_name_show:
-                    self.columns_names.value = "Columns' name: " + ", ".join(data_frame_head.columns)
-                    self.columns_names.update()
+
+                self.columns_names.value = "Columns' name: " + ", ".join(data_frame_head.columns)
+                self.columns_names.update()
+
+                # Make next and prev buttons editable
+                if self.show_columns < len(data_frame_head.columns):
+                    self.next_column.disabled = False
+                    self.next_column.update()
 
             except FileNotFoundError:
                 print("File not found.")
