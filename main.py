@@ -9,12 +9,16 @@ def main(page: ft.Page):
 
 
     # Init FilePickerHelper class
-    file_picker_helper = FilePickerHelper(page)
+    data_frame = FilePickerHelper(page)
 
     # Add open button
-    page.add(file_picker_helper.row_buttons)
+    page.add(data_frame.row_buttons)
     # Add dataframe table
-    page.add(file_picker_helper.row_table)
+    page.add(data_frame.row_table)
+    # row with editing
+    page.add(data_frame.row_table_editing)
+    # row for columns names
+    page.add(data_frame.row_columns_names)
 
 
 if __name__ == "__main__":
