@@ -2,7 +2,6 @@ import flet as ft
 import numpy as np
 import pandas as pd
 
-
 class FilePickerHelper:
     def __init__(self, page):
         """Open file, represent data"""
@@ -12,6 +11,9 @@ class FilePickerHelper:
         self.row_buttons = ft.Row()
         # Table's row with DataFrame data
         self.row_table = ft.Row(alignment=ft.MainAxisAlignment.CENTER)
+
+        # For data frame when open the file
+        self.data_frame_head = None
 
         # Row for columns count, next table columns and previous columns
         self.row_table_editing = ft.Row(alignment=ft.MainAxisAlignment.CENTER, scale=1.3, height=60)
@@ -25,7 +27,7 @@ class FilePickerHelper:
         # For scrolling dataframe's columns
         self.next_column = ft.IconButton(icon=ft.icons.ARROW_FORWARD, disabled=True,
                                          on_click=self.increase_dataframe_column)
-        self.previous_column = ft.IconButton(icon=ft.icons.ARROW_BACK, disabled=True)
+        self.previous_column = ft.IconButton(icon=ft.icons.ARROW_BACK, disabled=True, on_click=self.decrease_dataframe_column)
 
         # Get all columns' names
         self.columns_names = ft.Text("", no_wrap=False, scale=1.5, width=self.page.width / 2)
@@ -36,8 +38,11 @@ class FilePickerHelper:
         self.table_data_frame = ft.DataTable(columns=[ft.DataColumn(ft.Text("Columns"))], rows=[ft.DataRow(cells=[
             ft.DataCell(ft.Text("Cells"))
         ])], border_radius=10, expand=True, border=ft.border.all(2, "grey"))
+
+        # Number for data frame columns
+        self.number_column = 8
         # How many columns to show in data frame
-        self.show_columns = 8
+        self.show_columns = self.number_column
         # if we have many more than 8 columns, for next and prev buttons
         self.show_count = 0
 
@@ -78,6 +83,47 @@ class FilePickerHelper:
         except Exception as e:
             print("An error occurred:", e)
 
+
+    def update_next_prev(self):
+        """Update next and prev buttons"""
+        self.next_column.update()
+        self.previous_column.update()
+
+    def check_disable_next_prev(self):
+        """Make next and prev buttons disable or able"""
+        print("show col", self.show_columns)
+        print("df len", len(self.data_frame_head.columns))
+        if self.number_column <= self.show_columns < len(self.data_frame_head.columns):
+            self.next_column.disabled = False
+            self.previous_column.disabled = False
+            self.update_next_prev()
+        if self.show_columns >= len(self.data_frame_head.columns):
+            self.next_column.disabled = True
+            self.previous_column.disabled = False
+            self.update_next_prev()
+        if self.show_columns <= self.number_column:
+            self.next_column.disabled = False
+            self.previous_column.disabled = True
+            self.update_next_prev()
+
+    def increase_dataframe_column(self, e):
+        """Adding new column which are not visible, works with button next"""
+        self.show_columns += self.number_column
+        self.show_count += self.number_column
+        self.table_data_frame.columns = self.show_data_frame_columns(self.data_frame_head)
+        self.table_data_frame.rows = self.show_data_frame_rows(self.data_frame_head)
+        self.table_data_frame.update()
+        self.check_disable_next_prev()
+
+    def decrease_dataframe_column(self, e):
+        """Subtracting column which are not visible, works with button previous"""
+        self.show_columns -= self.number_column
+        self.show_count -= self.number_column
+        self.table_data_frame.columns = self.show_data_frame_columns(self.data_frame_head)
+        self.table_data_frame.rows = self.show_data_frame_rows(self.data_frame_head)
+        self.table_data_frame.update()
+        self.check_disable_next_prev()
+
     def show_data_frame_columns(self, df: pd.DataFrame) -> list:
         """Return data frame columns"""
         return [ft.DataColumn(ft.Text(header)) for header in df.columns[self.show_count:self.show_columns]]
@@ -90,35 +136,27 @@ class FilePickerHelper:
             rows.append(ft.DataRow(cells=cells))
         return rows
 
-    def increase_dataframe_column(self, e: ft.FilePickerResultEvent):
-        self.show_columns += self.show_columns
-        self.show_count += self.show_columns
-        self.table_data_frame.update()
-
     def represent_csv_file(self):
         """Represent csv file on the screen"""
         if self.file_name and self.file_name.endswith(".csv"):
             try:
                 data_frame = pd.read_csv(self.file_name)
                 print(data_frame.head())
-                data_frame_head = data_frame.head()
+                self.data_frame_head = data_frame.head()
                 # Change DataTable into new columns with data
-                self.table_data_frame.columns = self.show_data_frame_columns(data_frame_head)
-                self.table_data_frame.rows = self.show_data_frame_rows(data_frame_head)
+                self.table_data_frame.columns = self.show_data_frame_columns(self.data_frame_head)
+                self.table_data_frame.rows = self.show_data_frame_rows(self.data_frame_head)
                 self.table_data_frame.update()
 
-                self.columns_count.value = f"Columns: {len(data_frame_head.columns)}"
+                self.columns_count.value = f"Columns: {len(self.data_frame_head.columns)}"
                 self.columns_count.update()
-                self.rows_count.value = f"Rows: {len(data_frame_head)}"
+                self.rows_count.value = f"Rows: {len(self.data_frame_head)}"
                 self.rows_count.update()
 
-                self.columns_names.value = "Columns' name: " + ", ".join(data_frame_head.columns)
+                self.columns_names.value = "Columns: " + ", ".join(self.data_frame_head.columns)
                 self.columns_names.update()
 
-                # Make next and prev buttons editable
-                if self.show_columns < len(data_frame_head.columns):
-                    self.next_column.disabled = False
-                    self.next_column.update()
+                self.check_disable_next_prev()
 
             except FileNotFoundError:
                 print("File not found.")
