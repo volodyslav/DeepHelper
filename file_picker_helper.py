@@ -27,10 +27,12 @@ class FilePickerHelper:
         # For scrolling dataframe's columns
         self.next_column = ft.IconButton(icon=ft.icons.ARROW_FORWARD, disabled=True,
                                          on_click=self.increase_dataframe_column)
-        self.previous_column = ft.IconButton(icon=ft.icons.ARROW_BACK, disabled=True, on_click=self.decrease_dataframe_column)
+        self.previous_column = ft.IconButton(icon=ft.icons.ARROW_BACK, disabled=True,
+                                             on_click=self.decrease_dataframe_column)
 
         # Get all columns' names
-        self.columns_names = ft.Text("", no_wrap=False, scale=1.5, width=self.page.width / 2)
+        self.columns_names = ft.Dropdown(on_change=self.update_option_selected, scale=0.8)
+        self.y_target_name = ft.Text("")
 
         # File name
         self.file_name = None
@@ -40,7 +42,7 @@ class FilePickerHelper:
         ])], border_radius=10, expand=True, border=ft.border.all(2, "grey"))
 
         # Number for data frame columns
-        self.number_column = 8
+        self.number_column = 6
         # How many columns to show in data frame
         self.show_columns = self.number_column
         # if we have many more than 8 columns, for next and prev buttons
@@ -63,6 +65,7 @@ class FilePickerHelper:
         self.row_table_editing.controls.append(self.previous_column)
 
         self.row_columns_names.controls.append(self.columns_names)
+        self.row_columns_names.controls.append(self.y_target_name)
 
     def select_file(self, e: ft.FilePickerResultEvent):
         try:
@@ -126,7 +129,8 @@ class FilePickerHelper:
 
     def show_data_frame_columns(self, df: pd.DataFrame) -> list:
         """Return data frame columns"""
-        return [ft.DataColumn(ft.Text(header)) for header in df.columns[self.show_count:self.show_columns]]
+        return [ft.DataColumn(ft.Text(f"{header}, {dtype}")) for header, dtype in
+                zip(df.columns[self.show_count:self.show_columns], df.dtypes[self.show_count:self.show_columns])]
 
     def show_data_frame_rows(self, df: pd.DataFrame) -> list:
         """Returns data frame rows"""
@@ -135,6 +139,11 @@ class FilePickerHelper:
             cells = [ft.DataCell(ft.Text(str(row[header]))) for header in df.columns[self.show_count:self.show_columns]]
             rows.append(ft.DataRow(cells=cells))
         return rows
+
+    def update_option_selected(self, e):
+        self.y_target_name.value = self.columns_names.value
+        self.y_target_name.update()
+        print(self.columns_names)
 
     def represent_csv_file(self):
         """Represent csv file on the screen"""
@@ -153,12 +162,14 @@ class FilePickerHelper:
                 self.rows_count.value = f"Rows: {len(self.data_frame_head)}"
                 self.rows_count.update()
 
-                self.columns_names.value = "Columns: " + ", ".join(self.data_frame_head.columns)
+                self.columns_names.options = [ft.dropdown.Option(column) for column in self.data_frame_head.columns]
                 self.columns_names.update()
 
                 self.check_disable_next_prev()
+
 
             except FileNotFoundError:
                 print("File not found.")
             except Exception as e:
                 print("An error occurred:", e)
+
