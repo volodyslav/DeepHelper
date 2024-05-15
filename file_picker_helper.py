@@ -2,6 +2,7 @@ import flet as ft
 import numpy as np
 import pandas as pd
 
+
 class FilePickerHelper:
     def __init__(self, page):
         """Open file, represent data"""
@@ -18,8 +19,15 @@ class FilePickerHelper:
         # Row for columns count, next table columns and previous columns
         self.row_table_editing = ft.Row(alignment=ft.MainAxisAlignment.CENTER, scale=1.3, height=60)
 
-        # row for columns names
-        self.row_columns_names = ft.Row(alignment=ft.MainAxisAlignment.CENTER)
+        # row for choosing the y target
+        self.row_target_name = ft.Row(alignment=ft.MainAxisAlignment.CENTER)
+
+        # For X columns
+        self.row_columns_name = ft.Row(alignment=ft.MainAxisAlignment.CENTER)
+
+        # Row for choosing the X columns
+        self.row_columns_name = ft.Column(alignment=ft.MainAxisAlignment.CENTER, wrap=True, scroll=ft.ScrollMode.ALWAYS,
+                                          height=200, expand=True)
 
         # Count data frame columns
         self.columns_count = ft.Text("Columns: 0")
@@ -30,8 +38,8 @@ class FilePickerHelper:
         self.previous_column = ft.IconButton(icon=ft.icons.ARROW_BACK, disabled=True,
                                              on_click=self.decrease_dataframe_column)
 
-        # Get all columns' names
-        self.columns_names = ft.Dropdown(on_change=self.update_option_selected, scale=0.8)
+        # Get y target
+        self.columns_names = ft.Dropdown(on_change=self.update_option_selected, scale=0.8, label="Choose y target")
         self.y_target_name = ft.Text("")
 
         # File name
@@ -64,8 +72,8 @@ class FilePickerHelper:
         self.row_table_editing.controls.append(self.next_column)
         self.row_table_editing.controls.append(self.previous_column)
 
-        self.row_columns_names.controls.append(self.columns_names)
-        self.row_columns_names.controls.append(self.y_target_name)
+        self.row_table_editing.controls.append(self.columns_names)
+        self.row_table_editing.controls.append(self.y_target_name)
 
     def select_file(self, e: ft.FilePickerResultEvent):
         try:
@@ -164,6 +172,16 @@ class FilePickerHelper:
 
                 self.columns_names.options = [ft.dropdown.Option(column) for column in self.data_frame_head.columns]
                 self.columns_names.update()
+
+                # X columns
+                self.row_columns_name.controls.clear()
+                for column in self.data_frame_head.columns:
+                    checkbox = ft.Checkbox(label=column, value=column)
+                    print(checkbox.value)
+                    self.row_columns_name.controls.append(checkbox)
+                self.row_columns_name.update()
+                print("checkbox", self.row_columns_name.data)
+
 
                 self.check_disable_next_prev()
 

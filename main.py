@@ -7,7 +7,6 @@ from file_picker_helper import FilePickerHelper
 def main(page: ft.Page):
     page.title = "Deep Helper"
 
-
     # Init FilePickerHelper class
     data_frame = FilePickerHelper(page)
 
@@ -17,8 +16,10 @@ def main(page: ft.Page):
     page.add(data_frame.row_table)
     # row with editing
     page.add(data_frame.row_table_editing)
-    # row for columns names
-    page.add(data_frame.row_columns_names)
+    # row for y target
+    #page.add(data_frame.row_target_name)
+    # Row for X column
+    page.add(data_frame.row_columns_name)
 
 
 if __name__ == "__main__":
