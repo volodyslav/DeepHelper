@@ -27,7 +27,7 @@ class FilePickerHelper:
 
         # Row for choosing the X columns
         self.row_columns_name = ft.Column(alignment=ft.MainAxisAlignment.CENTER, wrap=True, scroll=ft.ScrollMode.ALWAYS,
-                                          height=200, expand=True)
+                                          height=200)
 
         # Count data frame columns
         self.columns_count = ft.Text("Columns: 0")
@@ -177,7 +177,7 @@ class FilePickerHelper:
                 self.row_columns_name.controls.clear()
                 for column in self.data_frame_head.columns:
                     checkbox = ft.Checkbox(label=column, value=column)
-                    print(checkbox.value)
+                    #print(checkbox.value)
                     self.row_columns_name.controls.append(checkbox)
                 self.row_columns_name.update()
                 print("checkbox", self.row_columns_name.data)
