@@ -15,6 +15,7 @@ class FilePickerHelper:
 
         # For data frame when open the file
         self.data_frame_head = None
+        self.data_frame = None
 
         # Row for columns count, next table columns and previous columns
         self.row_table_editing = ft.Row(alignment=ft.MainAxisAlignment.CENTER, scale=1.3, height=60)
@@ -157,9 +158,9 @@ class FilePickerHelper:
         """Represent csv file on the screen"""
         if self.file_name and self.file_name.endswith(".csv"):
             try:
-                data_frame = pd.read_csv(self.file_name)
-                print(data_frame.head())
-                self.data_frame_head = data_frame.head()
+                self.data_frame = pd.read_csv(self.file_name)
+                print(self.data_frame.head())
+                self.data_frame_head = self.data_frame.head()
                 # Change DataTable into new columns with data
                 self.table_data_frame.columns = self.show_data_frame_columns(self.data_frame_head)
                 self.table_data_frame.rows = self.show_data_frame_rows(self.data_frame_head)
