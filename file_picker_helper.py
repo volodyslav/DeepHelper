@@ -4,9 +4,11 @@ import pandas as pd
 
 
 class FilePickerHelper:
-    def __init__(self, page):
+    def __init__(self, page, data_plot):
         """Open file, represent data"""
         self.page = page
+        # for data visualization
+        self.data_plot = data_plot
 
         # Open buttons
         self.row_buttons = ft.Row()
@@ -159,6 +161,8 @@ class FilePickerHelper:
         if self.file_name and self.file_name.endswith(".csv"):
             try:
                 self.data_frame = pd.read_csv(self.file_name)
+                # Updating data frame for data visualisation
+                self.data_plot.update_data_frame(self.data_frame)
                 print(self.data_frame.head())
                 self.data_frame_head = self.data_frame.head()
                 # Change DataTable into new columns with data

@@ -2,17 +2,18 @@ import flet as ft
 import numpy as np
 import pandas as pd
 from file_picker_helper import FilePickerHelper
-from flet.matplotlib_chart import MatplotlibChart
+
 from data_visualization import DataVisualization
 
 
 
 def main(page: ft.Page):
     page.title = "Deep Helper"
-    # Init FilePickerHelper class
-    data_frame = FilePickerHelper(page)
+
     # Init Data Visualizer
-    data_plot = DataVisualization(page, data_frame.data_frame)
+    data_plot = DataVisualization(page)
+    # Init FilePickerHelper class
+    data_frame = FilePickerHelper(page, data_plot)
 
     tabs = ft.Tabs(
         selected_index=0,
@@ -33,7 +34,7 @@ def main(page: ft.Page):
                 text="Data Visualization",
                 content=ft.Container(
                     content=ft.Column([
-                        MatplotlibChart(data_plot.fig, expand=True)
+                        data_plot.row_plot
                     ])
                 )
             )
