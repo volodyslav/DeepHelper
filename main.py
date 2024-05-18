@@ -34,22 +34,14 @@ def main(page: ft.Page):
                 text="Data Visualization",
                 content=ft.Container(
                     content=ft.Column([
-                        data_plot.row_plot
+                        data_plot.column_plot,
+                        data_plot.column_settings
                     ])
                 )
             )
         ]
     )
     page.add(tabs)
-    # Add open button
-    #page.add(data_frame.row_buttons)
-    # Add dataframe table
-    #page.add(data_frame.row_table)
-    # row with editing
-    #page.add(data_frame.row_table_editing)
-    # Row for X column
-    #page.add(data_frame.row_columns_name)
-
 
 
 
