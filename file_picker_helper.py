@@ -11,7 +11,7 @@ class FilePickerHelper:
         self.data_plot = data_plot
 
         # Open buttons
-        self.row_buttons = ft.Row()
+        self.row_buttons = ft.Row(height=50)
         # Table's row with DataFrame data
         self.row_table = ft.Row(alignment=ft.MainAxisAlignment.CENTER)
 

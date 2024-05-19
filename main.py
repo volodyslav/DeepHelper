@@ -34,8 +34,10 @@ def main(page: ft.Page):
                 text="Data Visualization",
                 content=ft.Container(
                     content=ft.Column([
-                        data_plot.column_plot,
-                        data_plot.column_settings
+                        data_plot.row_plot,
+                        data_plot.row_figure_size,
+                        data_plot.row_figure_labels,
+                        data_plot.row_draw_value
                     ])
                 )
             )
