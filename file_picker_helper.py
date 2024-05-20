@@ -162,6 +162,8 @@ class FilePickerHelper:
             try:
                 self.data_frame = pd.read_csv(self.file_name)
                 # Updating data frame for data visualisation
+                # Set radio row to None
+                self.data_plot.reset_data_frame()
                 self.data_plot.update_data_frame(self.data_frame)
                 print(self.data_frame.head())
                 self.data_frame_head = self.data_frame.head()

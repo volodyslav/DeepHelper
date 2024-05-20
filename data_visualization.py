@@ -38,12 +38,10 @@ class DataVisualization:
                                            on_change=self.change_labels)
 
         # Button to draw a line
-        self.draw_line_button = ft.TextButton("Draw line", on_click=self.plot_data_frame, icon="draw",
-                                              style=ft.ButtonStyle(
-                                                  bgcolor=ft.colors.BLUE,  # Change the background color
-                                                  color=ft.colors.WHITE,  # Change the text color
-                                              ),
-                                              )
+        self.draw_button = ft.IconButton(on_click=self.plot_data_frame, icon="draw", icon_color="blue")
+
+        # clear all data button
+        self.clear_data_btn = ft.IconButton(on_click=self.clear_all, icon="delete", icon_color="red")
 
         # Select a plotting
         self.label_plot = ft.Text("Choose a plot: ", scale=1.2)
@@ -55,7 +53,6 @@ class DataVisualization:
 
         self.submit_draw = ft.TextButton("Submit", on_click=self.select_radio, disabled=True)
 
-
         # X and Y for line
         self.x_value_line = ft.Dropdown(scale=0.8, label="Choose X value")
         self.y_value_line = ft.Dropdown(scale=0.8, label="Choose y value")
@@ -64,7 +61,27 @@ class DataVisualization:
         self.row_plot.controls.append(self.plot_radio)
         self.row_plot.controls.append(self.submit_draw)
 
+    def clear_all(self, e):
+        """For clear button"""
+        self.delete_all_rows_data()
+        self.plot_radio.value = ""
+        self.plot_radio.update()
 
+    def delete_all_rows_data(self):
+        """Clear all rows when needed"""
+        self.row_figure_labels.controls.clear()
+        self.row_figure_size.controls.clear()
+        self.row_draw_value.controls.clear()
+        self.row_figure_labels.update()
+        self.row_draw_value.update()
+        self.row_figure_size.update()
+
+    def reset_data_frame(self):
+        """Clear the data visualizer tab when the data frame is changed"""
+        self.plot_radio.value = ""
+        self.plot_radio.update()
+        self.delete_all_rows_data()
+        self.row_plot.update()
 
     def update_data_frame(self, df):
         """Update df from file picker helper"""
@@ -78,7 +95,8 @@ class DataVisualization:
         self.row_figure_size.controls.append(self.text_figure_size)
         self.row_figure_size.controls.append(self.width_slider)
         self.row_figure_size.controls.append(self.height_slider)
-        self.row_figure_size.controls.append(self.draw_line_button)
+        self.row_figure_size.controls.append(self.draw_button)
+        self.row_figure_size.controls.append(self.clear_data_btn)
         # For figure labels and titles
         self.row_figure_labels.controls.append(self.figure_title)
         self.row_figure_labels.controls.append(self.x_figure_label)
@@ -96,11 +114,6 @@ class DataVisualization:
         self.x_value_line.update()
         self.y_value_line.update()
         print(f"X line = {self.x_value_line.value}, Y line = {self.y_value_line}")
-
-
-        # Disable button when choose a plot
-        self.submit_draw.disabled = True
-        self.submit_draw.update()
 
     def change_labels(self, e):
         """Update the labels and title"""
@@ -121,6 +134,8 @@ class DataVisualization:
     def select_radio(self, e):
         if self.plot_radio.value == "line":
             self.draw_line_settings()
+        elif self.plot_radio.value == 'scatter':
+            self.draw_line_settings()
 
     def draw_line(self):
         if self.data_frame is not None:
@@ -132,11 +147,16 @@ class DataVisualization:
         if self.data_frame is not None:
             try:
                 fig, ax = plt.subplots(figsize=(int(self.width_slider.value), int(self.height_slider.value)))
-                ax.plot(self.data_frame[str(self.x_value_line.value)], self.data_frame[str(self.y_value_line.value)])
+                if self.plot_radio.value == "line":
+                    ax.plot(self.data_frame[str(self.x_value_line.value)],
+                            self.data_frame[str(self.y_value_line.value)])
+                elif self.plot_radio.value == "scatter":
+                    ax.scatter(self.data_frame[str(self.x_value_line.value)],
+                            self.data_frame[str(self.y_value_line.value)])
                 ax.set_title(str(self.figure_title.value))
                 ax.set_xlabel(str(self.x_figure_label.value))
                 ax.set_ylabel(str(self.y_figure_label.value))
-                ax.set_xticks(self.data_frame["Date"])
+
                 fig.savefig(f"line_plot.png")
                 webbrowser.open(f"line_plot.png")
                 self.row_plot.update()
