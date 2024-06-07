@@ -26,7 +26,7 @@ def main(page: ft.Page):
                         data_frame.row_buttons,
                         data_frame.row_table,
                         data_frame.row_table_editing,
-                        data_frame.row_columns_name
+
                     ], horizontal_alignment=ft.CrossAxisAlignment.CENTER)
                 )
             ),
